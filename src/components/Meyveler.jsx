@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import AlertButton from "./AlertButton";
 import Meyve from "./Meyve";
 import { useReducer } from "react";
+import { MeyvelerContext } from "./MeyvelerContext";
+import { MeyvelerDispatchContext } from "./MeyvelerDispatchContext";
 
 export const Frame = ({ children }) => {
   return (
@@ -11,38 +13,14 @@ export const Frame = ({ children }) => {
     </div>
   );
 };
-const meyvelerReducer = (meyveler, { type, payload }) => {
-  switch (type) {
-    case "add": {
-      let id = Math.max(...meyveler.map((meyve) => meyve.id)) + 1;
-      return [...meyveler, { ...payload, id: id }];
-    }
-    case "delete": {
-      console.log(JSON.stringify(payload));
-      return meyveler.filter((meyve) => meyve.id !== payload?.id);
-    }
-    case "edit": {
-      return meyveler.map((meyve) => {
-        if (meyve.id === payload?.id) {
-          return { ...meyve, name: payload.yeniMeyve };
-        }
-        return meyve;
-      });
-    }
-    case "change": {
-      return meyveler.map((meyve) => {
-        return { ...meyve, ticked: meyve.id === payload?.id && !meyve.ticked };
-      });
-    }
-  }
-};
-export function Meyveler({ meyveler }) {
+export function Meyveler() {
   const [yeniMeyve, setYeniMeyve] = useState("");
   const [selected, setSelected] = useState("");
 
-  const [stateMeyveler, dispatch] = useReducer(meyvelerReducer, meyveler);
+  const meyveler = useContext(MeyvelerContext);
+  const dispatch = useContext(MeyvelerDispatchContext);
 
-  const filteredMeyveler = stateMeyveler.filter((meyve) => !meyve.hidden);
+  const filteredMeyveler = meyveler.filter((meyve) => !meyve.hidden);
 
   const handleEkle = (e) => {
     e.stopPropagation();
