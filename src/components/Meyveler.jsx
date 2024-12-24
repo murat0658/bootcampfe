@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import AlertButton from "./AlertButton";
+import Meyve from "./Meyve";
+import { useReducer } from "react";
 
 export const Frame = ({ children }) => {
   return (
@@ -9,49 +11,45 @@ export const Frame = ({ children }) => {
     </div>
   );
 };
-
-function Meyve(props) {
-  const { name, ...rest } = props;
-  return props.ticked ? (
-    <del>
-      <li>
-        {name}
-        <img {...rest} />
-      </li>
-    </del>
-  ) : (
-    <li>
-      {name}
-      <img {...rest} />
-    </li>
-  );
-}
-
-Meyve.propTypes = {
-  src: PropTypes.string.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired,
-  ticked: PropTypes.bool.isRequired,
-  hidden: PropTypes.bool.isRequired,
+const meyvelerReducer = (meyveler, { type, payload }) => {
+  switch (type) {
+    case "add": {
+      let id = Math.max(...meyveler.map((meyve) => meyve.id)) + 1;
+      return [...meyveler, { ...payload, id: id }];
+    }
+    case "delete": {
+      console.log(JSON.stringify(payload));
+      return meyveler.filter((meyve) => meyve.id !== payload?.id);
+    }
+    case "edit": {
+      return meyveler.map((meyve) => {
+        if (meyve.id === payload?.id) {
+          return { ...meyve, name: payload.yeniMeyve };
+        }
+        return meyve;
+      });
+    }
+    case "change": {
+      return meyveler.map((meyve) => {
+        return { ...meyve, ticked: meyve.id === payload?.id && !meyve.ticked };
+      });
+    }
+  }
 };
-
 export function Meyveler({ meyveler }) {
-  const [stateMeyveler, setStateMeyveler] = useState(meyveler);
   const [yeniMeyve, setYeniMeyve] = useState("");
+  const [selected, setSelected] = useState("");
+
+  const [stateMeyveler, dispatch] = useReducer(meyvelerReducer, meyveler);
 
   const filteredMeyveler = stateMeyveler.filter((meyve) => !meyve.hidden);
 
   const handleEkle = (e) => {
     e.stopPropagation();
     e.preventDefault();
-
-    let id = Math.max(...stateMeyveler.map((meyve) => meyve.id)) + 1;
-    console.log(id);
-    setStateMeyveler([
-      ...stateMeyveler,
-      {
-        id,
+    dispatch({
+      type: "add",
+      payload: {
         name: yeniMeyve,
         src: "./src/assets/elma.png",
         width: 32,
@@ -59,22 +57,50 @@ export function Meyveler({ meyveler }) {
         hidden: false,
         ticked: true,
       },
-    ]);
-    setYeniMeyve("");
+    }),
+      setYeniMeyve("");
+  };
+
+  const handleChange = (id) => {
+    dispatch({ type: "change", payload: { id } });
+  };
+
+  const handleDelete = (id) => {
+    dispatch({ type: "delete", payload: { id } });
+  };
+
+  const handleEdit = (e) => {
+    e.preventDefault();
+    dispatch({
+      type: "edit",
+      payload: {
+        id: selected,
+        yeniMeyve,
+      },
+    });
   };
 
   return (
     <>
       {filteredMeyveler.map((meyve) => (
-        <Meyve
-          key={meyve.id}
-          src={meyve.src}
-          width={meyve.width}
-          height={meyve.height}
-          name={meyve.name}
-          ticked={true}
-          hidden={false}
-        />
+        <li key={meyve.id}>
+          <input
+            type="radio"
+            value={selected}
+            onClick={() => setSelected(meyve.id)}
+            name="abc"
+          />
+          <Meyve
+            src={meyve.src}
+            width={meyve.width}
+            height={meyve.height}
+            name={meyve.name}
+            ticked={meyve.ticked}
+            hidden={false}
+            onClick={() => handleChange(meyve.id)}
+          />
+          <div onClick={() => handleDelete(meyve.id)}>X</div>
+        </li>
       ))}
       <form>
         <input
@@ -82,8 +108,11 @@ export function Meyveler({ meyveler }) {
           value={yeniMeyve}
           onChange={(e) => setYeniMeyve(e.target.value)}
         />
-        <button type="submit" onClick={(e) => handleEkle(e)}>
+        <button type="submit" onClick={handleEkle}>
           Ekle
+        </button>
+        <button type="submit" onClick={handleEdit}>
+          Edit
         </button>
       </form>
       <AlertButton message="buradayım!!" color="red">

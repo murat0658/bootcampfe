@@ -1,6 +1,7 @@
 import "./App.css";
 
 import { Meyveler, Frame } from "./components/Meyveler";
+import { useState } from "react";
 
 const meyveler = [
   {
@@ -41,9 +42,28 @@ const meyveler = [
   },
 ];
 
-function App() {
+function Counter({ person }) {
+  const [count, setCount] = useState(0);
   return (
-    <div id="baslangic">
+    <>
+      <div>{person}</div>
+      <div>{count}</div>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </>
+  );
+}
+
+function App() {
+  const [toggle, setToggle] = useState(false);
+
+  return (
+    <div>
+      {toggle ? (
+        <Counter key="ali" person="Ali" />
+      ) : (
+        <Counter key="ayşe" person="Ayşe" />
+      )}
+      <button onClick={() => setToggle((prev) => !prev)} />
       <Frame>
         <h3>Meyveler</h3>
         <ul className="liste">
