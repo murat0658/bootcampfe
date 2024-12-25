@@ -5,6 +5,8 @@ import Meyve from "./Meyve";
 import { useReducer } from "react";
 import { MeyvelerContext } from "./MeyvelerContext";
 import { MeyvelerDispatchContext } from "./MeyvelerDispatchContext";
+import { useDispatch } from "react-redux";
+import { actions } from "../redux/slice";
 
 export const Frame = ({ children }) => {
   return (

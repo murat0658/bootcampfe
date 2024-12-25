@@ -8,6 +8,7 @@ import { MeyvelerDispatchContext } from "./components/MeyvelerDispatchContext";
 import Kronometre from "./Kronometre";
 import Scroller from "./components/Scroller";
 import Posts from "./components/Posts";
+import Incrementor from "./components/Incrementor";
 
 function Counter({ person }) {
   const [count, setCount] = useState(0);
@@ -93,7 +94,8 @@ function App() {
 
   return (
     <div>
-      <Posts />
+      <Incrementor />
+      {/* <Posts /> */}
       {/* <Scroller /> */}
       {/* <label>Değer</label>
       <br />
